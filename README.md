@@ -1,6 +1,6 @@
-# پروژه‌ی تحلیل و یادگیری ماشین آگهی‌های املاک دیوار
+# پروژه تحلیل و یادگیری ماشین آگهی‌های املاک دیوار
 
-پروژه‌ی گروهی بوت‌کمپ هوش مصنوعی کوئرا — تحلیل آماری و مدل‌سازی روی دیتاست آگهی‌های املاک دیوار.
+پروژه گروهی بوت‌کمپ هوش مصنوعی کوئرا برای تحلیل آماری، آزمون فرض، خوشه‌بندی و مدل‌سازی روی دیتاست آگهی‌های املاک دیوار.
 
 ## اعضای تیم
 
@@ -13,113 +13,177 @@
 
 ```text
 divar-ml-project/
-├── README.md              ← همین فایل (نقشه و قوانین پروژه)
-├── .gitignore             ← جلوگیری از آپلود فایل‌های دیتا
-├── requirements.txt       ← کتابخونه‌های موردنیاز
-├── utils.py               ← توابع مشترک (UTM، تاریخ شمسی، قیمت هدف)
+├── README.md
+├── .gitignore
+├── requirements.txt
+├── utils.py
 └── notebooks/
-    ├── 01_preprocessing.ipynb      ← آماده‌سازی و تمیزکاری داده (نسخه‌ی ادغام‌شده)
-    ├── 02_descriptive_stats.ipynb  ← آمار توصیفی (سؤال ۱ تا ۹)
-    ├── 03_hypothesis_tests.ipynb   ← آزمون فرض (۴ فرضیه)
-    ├── 04_clustering.ipynb         ← خوشه‌بندی / توصیه‌گر (مسئله ۱)
-    ├── 05_prediction.ipynb         ← پیش‌بینی قیمت (مسئله ۲)
-    └── work/                       ← فایل‌های کاری هر نفر (قبل از ادغام)
+    ├── 01_preprocessing.ipynb
+    ├── 02_descriptive_stats.ipynb
+    ├── 03_hypothesis_tests.ipynb
+    ├── 04_clustering.ipynb
+    ├── 05_prediction.ipynb
+    └── work/
 ```
 
-## دسترسی به دیتا
+توضیح فایل‌ها:
 
-دو پوشه روی Google Drive داریم:
+* `README.md`: نقشه کلی پروژه، مسیر فایل‌ها، قوانین تیمی و وضعیت خروجی‌ها
+* `.gitignore`: جلوگیری از آپلود فایل‌های دیتا و فایل‌های موقت
+* `requirements.txt`: کتابخانه‌های موردنیاز پروژه
+* `utils.py`: توابع مشترک پروژه مانند تبدیل تاریخ، تبدیل UTM و توابع کمکی قیمت
+* `01_preprocessing.ipynb`: نوت‌بوک اصلی preprocessing و ادغام کارهای اعضای تیم
+* `02_descriptive_stats.ipynb`: آمار توصیفی
+* `03_hypothesis_tests.ipynb`: آزمون فرض
+* `04_clustering.ipynb`: خوشه‌بندی و توصیه‌گر
+* `05_prediction.ipynb`: پیش‌بینی قیمت
+* `notebooks/work/`: نوت‌بوک‌های کاری هر نفر قبل از ادغام
 
-### پوشه‌ی منتور (`Divar Dataset`) — دیتای خام، فقط خواندنی
+## دسترسی به داده‌ها
 
-* `Divar.csv` — دیتاست اصلی آگهی‌های املاک
-* `iran_city_classification.csv` — دسته‌بندی شهرها (برای آزمون فرض ۱)
+داده‌ها روی Google Drive نگه‌داری می‌شوند و نباید داخل GitHub آپلود شوند.
 
-### پوشه‌ی مشترک تیم (`divar_project`) — برای خروجی‌های خودمان
+### پوشه دیتای خام
 
-* `cleaned_step1.parquet` — دیتای تمیزشده‌ی مرحله‌ی اول (نوع داده + مقادیر گم‌شده)
-* `cleaned_step2_benyamin_v2.parquet` — خروجی مرحله‌ی دوم preprocessing شامل ستون‌های قیمت هدف، قیمت واحد، flagهای قیمت و اعتبارسنجی اولیه جغرافیا
-* `cleaned_step3_geo.parquet` — خروجی مرحله‌ی سوم preprocessing شامل پاکسازی جغرافیایی و تبدیل مختصات به UTM
+```text
+/content/drive/MyDrive/Divar Dataset/
+```
 
-قبل از شروع کار، هر عضو تیم باید یک‌بار این دو پوشه را با **Add shortcut to Drive** به Drive خودش اضافه کند.
+فایل‌های اصلی:
+
+```text
+Divar.csv
+iran_city_classification.csv
+```
+
+### پوشه خروجی‌های تیم
+
+```text
+/content/drive/MyDrive/divar_project/
+```
+
+فایل‌های خروجی preprocessing:
+
+```text
+cleaned_step1.parquet
+cleaned_step2_benyamin_v2.parquet
+cleaned_step3_geo.parquet
+```
 
 برای لود دیتای خام:
 
 ```python
-df = pd.read_csv('/content/drive/MyDrive/Divar Dataset/Divar.csv')
+df = pd.read_csv("/content/drive/MyDrive/Divar Dataset/Divar.csv")
 ```
 
-برای لود آخرین نسخه‌ی تمیزشده‌ی داده بعد از مرحله‌ی جغرافیایی:
+برای لود آخرین نسخه تمیزشده:
 
 ```python
-df = pd.read_parquet('/content/drive/MyDrive/divar_project/cleaned_step3_geo.parquet')
+df = pd.read_parquet("/content/drive/MyDrive/divar_project/cleaned_step3_geo.parquet")
 ```
 
 برای لود خروجی‌های میانی preprocessing:
 
 ```python
-df_step1 = pd.read_parquet('/content/drive/MyDrive/divar_project/cleaned_step1.parquet')
-df_step2 = pd.read_parquet('/content/drive/MyDrive/divar_project/cleaned_step2_benyamin_v2.parquet')
-df_step3 = pd.read_parquet('/content/drive/MyDrive/divar_project/cleaned_step3_geo.parquet')
+df_step1 = pd.read_parquet("/content/drive/MyDrive/divar_project/cleaned_step1.parquet")
+df_step2 = pd.read_parquet("/content/drive/MyDrive/divar_project/cleaned_step2_benyamin_v2.parquet")
+df_step3 = pd.read_parquet("/content/drive/MyDrive/divar_project/cleaned_step3_geo.parquet")
 ```
 
-نکته: دیتای تمیز با فرمت `parquet` ذخیره شده تا نوع داده‌ها مثل `category`، `boolean` و `datetime` حفظ شوند.
+نکته: خروجی‌های تمیزشده با فرمت `parquet` ذخیره شده‌اند تا نوع داده‌ها مثل `category`، `boolean`، `datetime` و `Int64` بهتر حفظ شوند.
 
-## محیط کار
+## محیط اجرا
 
-* اجرای کد: Google Colab
-* نگه‌داری کد: همین ریپوی GitHub
-* نگه‌داری دیتا: Google Drive
+* اجرای کدها: Google Colab
+* نگه‌داری کدها: GitHub
+* نگه‌داری داده‌ها: Google Drive
 
-برای نصب کتابخانه‌ها، در ابتدای هر نوت‌بوک:
+برای نصب کتابخانه‌های موردنیاز:
 
 ```python
 !pip install -r requirements.txt
 ```
 
-## نکات مهم درباره‌ی داده
+در صورتی که نوت‌بوک مستقیم در Colab اجرا شود و فایل `requirements.txt` در همان مسیر در دسترس نباشد، کتابخانه‌های اصلی می‌توانند جداگانه نصب شوند:
 
-* ستون‌های `transformable_price` و `rent_credit_transform` با اینکه در نامشان قیمت یا تبدیل آمده، در واقع مقدار `True/False` دارند. یعنی فلگ هستند، نه مقدار عددی قیمت.
+```python
+!pip install -q jdatetime utm pyarrow
+```
 
-* قیمت فروش واقعی در ستون `price_value` قرار دارد.
+## نکات مهم درباره داده
 
-* مقدار رهن در ستون‌های `credit_value` و `transformable_credit` قرار دارد.
-
+* ستون‌های `transformable_price` و `rent_credit_transform` با وجود نامشان، مقدار عددی قیمت نیستند و به‌عنوان flagهای `True/False` استفاده می‌شوند.
+* قیمت فروش در ستون `price_value` قرار دارد.
+* مقدار رهن در ستون `credit_value` قرار دارد.
 * مقدار اجاره در ستون `rent_value` قرار دارد.
+* بعضی از مقدارهای گم‌شده ساختاری هستند و نباید با مقدار کلی پر شوند.
+* ستون‌هایی مثل `land_size`، `floor`، `total_floors_count`، `unit_per_floor`، `regular_person_capacity` و ستون‌های `transformed_*` در بسیاری از ردیف‌ها عمداً خالی باقی مانده‌اند، چون معنی آن‌ها به نوع آگهی وابسته است.
+* برای تحلیل قیمت، ردیف‌ها حذف نشده‌اند؛ به‌جای حذف، flagهای اعتبارسنجی ساخته شده‌اند.
+* برای تحلیل جغرافیایی نیز ردیف‌ها حذف نشده‌اند؛ فقط ردیف‌های قابل استفاده با flag مشخص شده‌اند.
 
-* ستون‌های قیمت، اجاره، رهن و چند ستون دیگر، از جمله `property_type`، `land_size`، `floor`، `total_floors_count`، `unit_per_floor`، `regular_person_capacity` و ستون‌های `transformed_*` عمداً `NaN` نگه داشته شده‌اند، چون خالی‌بودن آن‌ها ساختاری است یا تصمیم درباره‌ی آن‌ها به مرحله‌های بعدی وابسته است.
+## خروجی مرحله اول preprocessing
 
-* مقادیر گم‌شده‌ی `rooms_count` و `building_size` برای دسته‌هایی مثل `plot-old` و پیش‌فروش، ماهیت خالیِ ساختاری دارند. بنابراین به جای پر شدن با میانه‌ی کل، همچنان `NaN` باقی مانده‌اند تا در مدل‌سازی‌های بعدی، مثل زمین بدون اتاق، درست در نظر گرفته شوند.
+در مرحله اول، دیتای خام خوانده شد و عملیات پایه preprocessing انجام شد.
 
-### ویرایش جدید مرحله اول
+کارهای اصلی این مرحله:
 
-* در نسخه‌ی جدید `cleaned_step1.parquet`، مقادیر گم‌شده‌ی `construction_year` با میانه‌ی کل پر شده‌اند. همچنین مقادیر گم‌شده‌ی `rooms_count` و `building_size` با میانه‌ی هر `cat3_slug` پر شده‌اند. با این حال، NaNهایی که ماهیت ساختاری دارند یا تصمیم درباره‌ی آن‌ها به مرحله‌های بعدی وابسته است، حفظ شده‌اند.
+* حذف ستون اضافی `Unnamed: 0`
+* اصلاح نوع داده ستون‌های عددی
+* تبدیل ستون‌های بولین به نوع مناسب
+* تبدیل مقدار `unselect` به `NaN`
+* تبدیل تاریخ میلادی `created_at_month` به تاریخ شمسی
+* ساخت ستون‌های `created_at_shamsi` و `created_at_shamsi_readable`
+* حذف چند ستون غیرضروری مربوط به اجاره روزانه
+* پر کردن مقدارهای گم‌شده `construction_year` با میانه کل
+* پر کردن مقدارهای گم‌شده `rooms_count` و `building_size` با میانه هر `cat3_slug`
+* حذف ردیف‌هایی که ستون‌های کلیدی `title`، `cat3_slug` یا `city_slug` را ندارند
 
-* در خروجی `cleaned_step2_benyamin_v2.parquet`، برای تحلیل قیمت، رکوردها حذف نشده‌اند؛ بلکه برای تشخیص داده‌های مناسب‌تر، ستون‌های flag ساخته شده‌اند. مهم‌ترین flag این مرحله `is_valid_for_price_analysis` است.
+خروجی این مرحله:
 
----
+```text
+cleaned_step1.parquet
+```
 
-## خروجی مرحله‌ی دوم preprocessing
+خلاصه خروجی:
 
-در مرحله‌ی دوم preprocessing، بنیامین ستون‌های کمکی مربوط به قیمت، متراژ و داده‌های پرت را روی نسخه‌ی به‌روزشده‌ی دیتای علی محاسبه کرده است.
+```text
+total_rows: 999,943
+output_columns_count: 53
+dropped_rows: 57
+```
+
+## خروجی مرحله دوم preprocessing
+
+در مرحله دوم، کدهای بنیامین روی خروجی مرحله اول اجرا شد.
+
+در این مرحله ستون‌های مربوط به قیمت، متراژ، قیمت هدف و flagهای اعتبارسنجی ساخته شدند. هیچ ردیفی در این مرحله حذف نشده است.
 
 ستون‌های مهم ساخته‌شده:
 
-* `transaction_type` — نوع معامله: فروش، اجاره، اجاره موقت یا سایر موارد
-* `price_value_pos`، `rent_value_pos`، `credit_value_pos` — نسخه‌ی مثبت ستون‌های قیمت، اجاره و رهن
-* `area_for_unit_price` — متراژ مبنا برای محاسبه قیمت واحد
-* `monthly_rent_equivalent` — تبدیل رهن و اجاره به معادل اجاره ماهانه
-* `credit_equivalent` — تبدیل اجاره و رهن به معادل رهن
-* `sale_price_per_m2` — قیمت فروش به ازای هر متر مربع
-* `monthly_rent_equivalent_per_m2` — اجاره ماهانه معادل به ازای هر متر مربع
-* `target_price` — قیمت هدف برای تحلیل و مدل‌سازی
-* `target_price_type` — نوع قیمت هدف
-* `target_price_per_m2` — قیمت هدف به ازای هر متر مربع
-* `has_geo` — مشخص می‌کند رکورد مختصات جغرافیایی دارد یا نه
-* `is_valid_geo_basic` — اعتبارسنجی اولیه مختصات جغرافیایی
-* `is_valid_for_price_analysis` — flag نهایی برای انتخاب رکوردهای مناسب تحلیل قیمت
+* `transaction_type`: نوع معامله شامل فروش، اجاره، اجاره موقت یا سایر موارد
+* `price_value_pos`: نسخه مثبت قیمت فروش
+* `rent_value_pos`: نسخه مثبت اجاره
+* `credit_value_pos`: نسخه مثبت رهن
+* `building_size_pos`: نسخه مثبت متراژ بنا
+* `land_size_pos`: نسخه مثبت متراژ زمین
+* `area_for_unit_price`: متراژ مبنا برای محاسبه قیمت واحد
+* `monthly_rent_equivalent`: معادل اجاره ماهانه برای آگهی‌های اجاره
+* `credit_equivalent`: معادل رهن برای آگهی‌های اجاره
+* `sale_price_per_m2`: قیمت فروش به ازای هر متر مربع
+* `monthly_rent_equivalent_per_m2`: اجاره ماهانه معادل به ازای هر متر مربع
+* `credit_equivalent_per_m2`: رهن معادل به ازای هر متر مربع
+* `target_price`: قیمت هدف برای تحلیل و مدل‌سازی
+* `target_price_type`: نوع قیمت هدف
+* `target_price_per_m2`: قیمت هدف به ازای هر متر مربع
+* `is_valid_for_price_analysis`: flag نهایی برای انتخاب ردیف‌های مناسب تحلیل قیمت
+* `has_geo`: مشخص می‌کند ردیف مختصات جغرافیایی دارد یا نه
+* `is_valid_geo_basic`: اعتبارسنجی اولیه مختصات جغرافیایی
 
-در این مرحله هیچ رکوردی حذف نشده است. فقط ستون‌های کمکی و flagهای اعتبارسنجی اضافه شده‌اند.
+خروجی این مرحله:
+
+```text
+cleaned_step2_benyamin_v2.parquet
+```
 
 خلاصه خروجی:
 
@@ -130,28 +194,33 @@ valid_for_price_analysis: 877,587
 invalid_for_price_analysis: 122,356
 rows_with_geo: 655,594
 invalid_geo_rows: 18
+output_columns_count: 78
 ```
 
----
+## خروجی مرحله سوم preprocessing
 
-## خروجی مرحله‌ی سوم preprocessing
+در مرحله سوم، پردازش جغرافیایی داده‌ها توسط علی انجام شد.
 
-در مرحله‌ی سوم preprocessing، بخش جغرافیایی داده‌ها توسط علی آماده‌سازی شده است.
-
-در این مرحله رکوردها حذف نشده‌اند؛ بلکه برای استفاده در تحلیل‌های مکانی، نقشه، clustering و مدل‌سازی، ستون‌های جدید مربوط به اعتبارسنجی مختصات و تبدیل UTM ساخته شده‌اند.
+در این مرحله ردیف‌ها حذف نشدند. ابتدا مختصات جغرافیایی بررسی شد، سپس برای ردیف‌هایی که مختصات معتبر داشتند، تبدیل latitude و longitude به UTM انجام شد.
 
 ستون‌های مهم ساخته‌شده:
 
-* `is_valid_geo_for_analysis` — flag نهایی برای مشخص کردن رکوردهای قابل استفاده در تحلیل جغرافیایی
-* `utm_easting` — مختصات UTM در محور شرقی-غربی
-* `utm_northing` — مختصات UTM در محور شمالی-جنوبی
-* `utm_zone_number` — شماره zone در سیستم UTM
-* `utm_zone_letter` — حرف zone در سیستم UTM
+* `is_valid_geo_for_analysis`: flag نهایی برای مشخص کردن ردیف‌های قابل استفاده در تحلیل جغرافیایی
+* `utm_easting`: مختصات UTM در محور شرقی-غربی
+* `utm_northing`: مختصات UTM در محور شمالی-جنوبی
+* `utm_zone_number`: شماره zone در سیستم UTM
+* `utm_zone_letter`: حرف zone در سیستم UTM
 
 منطق ستون `is_valid_geo_for_analysis`:
 
-* مقدار `True` یعنی رکورد مختصات معتبر دارد و برای تحلیل جغرافیایی قابل استفاده است.
-* مقدار `False` یعنی رکورد مختصات ندارد یا مختصات آن نامعتبر است.
+* مقدار `True`: ردیف مختصات معتبر دارد و برای تحلیل جغرافیایی قابل استفاده است.
+* مقدار `False`: ردیف مختصات ندارد یا مختصات آن نامعتبر است.
+
+خروجی این مرحله:
+
+```text
+cleaned_step3_geo.parquet
+```
 
 خلاصه خروجی:
 
@@ -163,45 +232,60 @@ invalid_geo_rows: 18
 output_columns_count: 83
 ```
 
-بررسی zoneهای UTM نشان داد که داده‌ها در چند zone مختلف قرار دارند. بیشترین حجم داده در zone زیر قرار دارد:
+بررسی zoneهای UTM نشان داد داده‌ها در چند zone مختلف قرار دارند. بیشترین حجم داده در zone زیر است:
 
 ```text
 UTM zone 39S: 452,153 rows ≈ 68.97%
 ```
 
-بنابراین در مراحل بعدی، مخصوصاً clustering سراسری، باید به چند-zone بودن مختصات UTM توجه شود.
+نکته: چون داده‌ها در چند zone مختلف UTM قرار دارند، در مراحل بعدی، مخصوصاً clustering سراسری، نباید `utm_easting` و `utm_northing` بدون توجه به `utm_zone_number` و `utm_zone_letter` مستقیم با هم مقایسه شوند.
 
-فایل خروجی این مرحله:
+## خروجی نهایی preprocessing
+
+آخرین فایل آماده برای استفاده در مراحل بعدی پروژه:
 
 ```text
 cleaned_step3_geo.parquet
 ```
 
----
+مشخصات فایل نهایی:
+
+```text
+rows: 999,943
+columns: 83
+rows_with_target_price: 917,334
+valid_for_price_analysis: 877,587
+valid_geo_for_analysis: 655,576
+```
 
 ## قوانین کار تیمی
 
-* هر کس فقط روی نوت‌بوک فاز خودش کار می‌کند؛ همزمان دو نفر روی یک فایل کار نمی‌کنند.
-* قبل از شروع کار، همیشه آخرین نسخه‌ی فایل را از GitHub باز کنید، نه نسخه‌ی قدیمی.
-* بعد از اتمام کار، با پیام واضح commit بزنید؛ برای مثال: `سؤال ۳ آمار توصیفی اضافه شد`.
-* commitهای کوچک و مکرر بهتر از یک commit بزرگ آخر کار است.
-* در مسیر و اسم فایل‌ها هیچ فاصله‌ای نگذارید.
+* هر نفر فقط روی نوت‌بوک مربوط به فاز خودش کار می‌کند.
+* همزمان دو نفر روی یک فایل مشترک کار نمی‌کنند.
+* قبل از شروع کار، آخرین نسخه فایل‌ها از GitHub گرفته می‌شود.
+* بعد از اتمام هر بخش، commit با پیام واضح ثبت می‌شود.
+* commitهای کوچک و مکرر بهتر از یک commit بزرگ و مبهم هستند.
+* فایل‌های دیتا نباید داخل GitHub آپلود شوند.
+* نام فایل‌ها و مسیرها نباید فاصله داشته باشند.
+* خروجی‌های سنگین فقط در Google Drive نگه‌داری می‌شوند.
 
 ## تقسیم وظایف
 
 ### آماده‌سازی داده
 
 * مدیریت مقادیر گم‌شده: علی ✅
-* اصلاح نوع داده‌ها (عددی/دسته‌ای/بولین/تاریخ) + تبدیل تاریخ شمسی: علی ✅
+* اصلاح نوع داده‌ها: علی ✅
+* تبدیل تاریخ شمسی: علی ✅
+* ساخت خروجی مرحله اول preprocessing: علی ✅
 * ساخت ستون قیمت واحد: بنیامین ✅
 * ساخت قیمت هدف و معادل‌سازی رهن/اجاره: بنیامین ✅
-* مدیریت داده‌های پرت قیمت و متراژ با flag، بدون حذف رکورد: بنیامین ✅
-* ساخت خروجی مرحله‌ی دوم preprocessing: بنیامین ✅
-* تابع تبدیل مختصات به UTM: لیلا (انجام شده توسط علی) ✅
-* تمیزکاری داده‌های جغرافیایی: لیلا (انجام شده توسط علی) ✅
-* ساخت خروجی مرحله‌ی سوم preprocessing: لیلا (انحام شده توسط علی)‌ ✅
+* مدیریت داده‌های پرت قیمت و متراژ با flag: بنیامین ✅
+* ساخت خروجی مرحله دوم preprocessing: بنیامین ✅
+* بررسی و آماده‌سازی داده‌های جغرافیایی: علی ✅
+* تبدیل مختصات latitude/longitude به UTM: علی ✅
+* ساخت خروجی مرحله سوم preprocessing: علی ✅
+* ادغام نهایی در نوت‌بوک اصلی `01_preprocessing.ipynb`: علی ✅
 * جمع‌بندی و مستندسازی دیتا: تینا
-* ادغام نهایی در نوت‌بوک اصلی `01_preprocessing.ipynb`: در انتظار هماهنگی نهایی با علی
 
 ### آمار توصیفی
 
@@ -219,4 +303,4 @@ cleaned_step3_geo.parquet
 
 ### یادگیری ماشین
 
-تقسیم وظایف این بخش، یعنی خوشه‌بندی و پیش‌بینی، بعداً مشخص و اضافه می‌شود.
+تقسیم وظایف بخش خوشه‌بندی و پیش‌بینی قیمت بعداً نهایی و به README اضافه می‌شود.

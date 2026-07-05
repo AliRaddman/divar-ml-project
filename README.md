@@ -117,6 +117,8 @@ df_step3 = pd.read_parquet("/content/drive/MyDrive/divar_project/cleaned_step3_g
 * مقدار رهن در ستون `credit_value` قرار دارد.
 * مقدار اجاره در ستون `rent_value` قرار دارد.
 * بعضی از مقدارهای گم‌شده ساختاری هستند و نباید با مقدار کلی پر شوند.
+* مقدارهای گم‌شده‌ی `construction_year` در بعضی دسته‌ها ساختاری هستند؛ بنابراین ستون اصلی `construction_year` با میانه پر نشده و مقدارهای خالی آن حفظ شده‌اند.
+* برای استفاده احتمالی در مدل‌سازی، دو ستون کمکی `construction_year_was_missing` و `construction_year_imputed` ساخته شده‌اند.
 * ستون‌هایی مثل `land_size`، `floor`، `total_floors_count`، `unit_per_floor`، `regular_person_capacity` و ستون‌های `transformed_*` در بسیاری از ردیف‌ها عمداً خالی باقی مانده‌اند، چون معنی آن‌ها به نوع آگهی وابسته است.
 * برای تحلیل قیمت، ردیف‌ها حذف نشده‌اند؛ به‌جای حذف، flagهای اعتبارسنجی ساخته شده‌اند.
 * برای تحلیل جغرافیایی نیز ردیف‌ها حذف نشده‌اند؛ فقط ردیف‌های قابل استفاده با flag مشخص شده‌اند.
@@ -134,7 +136,9 @@ df_step3 = pd.read_parquet("/content/drive/MyDrive/divar_project/cleaned_step3_g
 * تبدیل تاریخ میلادی `created_at_month` به تاریخ شمسی
 * ساخت ستون‌های `created_at_shamsi` و `created_at_shamsi_readable`
 * حذف چند ستون غیرضروری مربوط به اجاره روزانه
-* پر کردن مقدارهای گم‌شده `construction_year` با میانه کل
+* حفظ مقدارهای گم‌شده‌ی `construction_year` در ستون اصلی
+* ساخت ستون `construction_year_was_missing` برای مشخص کردن ردیف‌هایی که سال ساخت نداشتند
+* ساخت ستون `construction_year_imputed` برای نسخه‌ی پرشده‌ی سال ساخت با میانه کل
 * پر کردن مقدارهای گم‌شده `rooms_count` و `building_size` با میانه هر `cat3_slug`
 * حذف ردیف‌هایی که ستون‌های کلیدی `title`، `cat3_slug` یا `city_slug` را ندارند
 
@@ -148,8 +152,10 @@ cleaned_step1.parquet
 
 ```text
 total_rows: 999,943
-output_columns_count: 53
+output_columns_count: 55
 dropped_rows: 57
+missing_construction_year: 184,164
+missing_construction_year_imputed: 0
 ```
 
 ## خروجی مرحله دوم preprocessing
@@ -194,7 +200,7 @@ valid_for_price_analysis: 877,587
 invalid_for_price_analysis: 122,356
 rows_with_geo: 655,594
 invalid_geo_rows: 18
-output_columns_count: 78
+output_columns_count: 80
 ```
 
 ## خروجی مرحله سوم preprocessing
@@ -229,7 +235,7 @@ total_rows: 999,943
 valid_geo_for_analysis: 655,576
 invalid_or_missing_geo_for_analysis: 344,367
 invalid_geo_rows: 18
-output_columns_count: 83
+output_columns_count: 85
 ```
 
 بررسی zoneهای UTM نشان داد داده‌ها در چند zone مختلف قرار دارند. بیشترین حجم داده در zone زیر است:
@@ -252,11 +258,93 @@ cleaned_step3_geo.parquet
 
 ```text
 rows: 999,943
-columns: 83
+columns: 85
 rows_with_target_price: 917,334
 valid_for_price_analysis: 877,587
 valid_geo_for_analysis: 655,576
+missing_construction_year: 184,164
 ```
+
+## وضعیت آمار توصیفی
+
+بخشی از آمار توصیفی در نوت‌بوک کاری مربوط به علی انجام شده و بعداً باید در نوت‌بوک اصلی `02_descriptive_stats.ipynb` ادغام شود.
+
+### سؤال ۱: توزیع آگهی‌ها در دسته‌بندی‌ها
+
+در این بخش، توزیع آگهی‌ها بر اساس `cat2_slug` و `cat3_slug` بررسی شد.
+
+خلاصه نتایج:
+
+```text
+cat2_slug unique values: 6
+cat3_slug unique values: 16
+```
+
+در دسته‌بندی سطح دو، بیشترین سهم مربوط به:
+
+```text
+residential-sell: 558,692 rows ≈ 55.87%
+residential-rent: 276,528 rows ≈ 27.65%
+```
+
+در دسته‌بندی سطح سه، بیشترین سهم مربوط به:
+
+```text
+apartment-sell: 303,372 rows ≈ 30.34%
+apartment-rent: 211,853 rows ≈ 21.19%
+plot-old: 133,570 rows ≈ 13.36%
+house-villa-sell: 121,750 rows ≈ 12.18%
+```
+
+نتیجه: دیتاست از نظر دسته‌بندی نامتوازن است و بخش عمده آن مربوط به آگهی‌های مسکونی، مخصوصاً آپارتمان فروش و آپارتمان اجاره است.
+
+### سؤال ۲: هیستوگرام سال ساخت
+
+در این بخش، توزیع `construction_year` بررسی شد.
+
+نکته مهم: چون مقدارهای گم‌شده‌ی `construction_year` در برخی دسته‌ها ساختاری هستند، برای رسم هیستوگرام از ستون اصلی `construction_year` استفاده شد و مقدارهای گم‌شده در نمودار پر نشدند.
+
+خلاصه نتایج:
+
+```text
+most_frequent_construction_year: 1403
+share_of_1403_among_valid_years: 14.25%
+```
+
+سال `1390` نیز فراوانی نسبتاً بالایی داشت. بررسی تکمیلی نشان داد این مقدار فقط در یک دسته خاص متمرکز نیست و در چند دسته اصلی مانند `apartment-rent`، `apartment-sell`، `house-villa-rent` و `house-villa-sell` دیده می‌شود.
+
+نتیجه: بخش قابل توجهی از آگهی‌ها مربوط به املاک نوساز یا نسبتاً جدید است. همچنین جهش سال `1390` می‌تواند ترکیبی از واقعیت بازار و ورود تقریبی سال ساخت توسط کاربران باشد.
+
+### سؤال ۳: تعداد آگهی‌های فروش و اجاره در ماه‌های مختلف
+
+در این بخش، تعداد آگهی‌های `sell` و `rent` در ماه‌های مختلف شمسی بررسی شد.
+
+ابتدا همه ماه‌های موجود در دیتاست رسم شدند. نمودار کامل نشان داد پوشش زمانی داده‌ها یکنواخت نیست و بخش اصلی داده‌ها در بازه زیر قرار دارد:
+
+```text
+1403-02 تا 1403-09
+```
+
+برای اطمینان از اینکه این موضوع ناشی از preprocessing نیست، تعداد آگهی‌ها در دیتای خام و دیتای نهایی مقایسه شد.
+
+```text
+raw_rows: 1,000,000
+final_rows: 999,943
+dropped_rows: 57
+```
+
+نتیجه: کم بودن تعداد آگهی‌ها در ماه‌های خارج از بازه اصلی از خود دیتای خام ناشی شده و مربوط به preprocessing نیست.
+
+در بازه قابل اتکا، آگهی‌های فروش نسبتاً پایدارتر بودند و بیشتر بین حدود `67` هزار تا `77` هزار آگهی در ماه قرار داشتند. آگهی‌های اجاره نوسان بیشتری داشتند.
+
+افزایش‌های مهم:
+
+```text
+rent in 1403-03: +49.51% compared to previous month
+sell in 1403-07: +11.08% compared to previous month
+```
+
+نتیجه: افزایش چشم‌گیر اصلی مربوط به آگهی‌های اجاره در `1403-03` است. برای فروش نیز در `1403-07` افزایش قابل توجهی دیده می‌شود، اما شدت آن کمتر از جهش اجاره است.
 
 ## قوانین کار تیمی
 
@@ -289,7 +377,7 @@ valid_geo_for_analysis: 655,576
 
 ### آمار توصیفی
 
-* سؤال ۱، ۲، ۳: لیلا
+* سؤال ۱، ۲، ۳: علی ✅
 * سؤال ۴، ۵: بنیامین
 * سؤال ۶، ۷: علی
 * سؤال ۸، ۹: تینا

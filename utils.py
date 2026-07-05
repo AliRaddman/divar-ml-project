@@ -1,4 +1,3 @@
-# common helper functions: UTM conversion, Shamsi date, target price
 import pandas as pd
 import numpy as np
 import utm
